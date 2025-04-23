@@ -1,4 +1,3 @@
-// src/app.ts
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -15,7 +14,15 @@ connectDB();
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "reddit-clone2-frontend.vercel.app"
+    ],
+    credentials: true
+  })
+);
 app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());
