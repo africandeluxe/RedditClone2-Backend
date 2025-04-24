@@ -162,8 +162,10 @@ export const votePost = async (req: AuthenticatedRequest, res: Response): Promis
 export const getMyPosts = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const userId = req.user?._id;
+    console.log("Getting posts for user:", userId);
 
     if (!userId) {
+      console.warn("No user ID on request");
       res.status(401).json({ message: "Not authorized" });
       return;
     }
@@ -172,6 +174,7 @@ export const getMyPosts = async (req: AuthenticatedRequest, res: Response): Prom
       .populate("author", "username")
       .sort({ createdAt: -1 });
 
+    console.log(`Found ${posts.length} post(s) for user ${userId}`);
     res.json(posts);
   } catch (error) {
     console.error("getMyPosts error:", error);
