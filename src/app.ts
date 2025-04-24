@@ -20,9 +20,19 @@ app.use(
       "http://localhost:3000",
       "reddit-clone2-frontend.vercel.app"
     ],
-    credentials: true
-  })
-);
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+  }));
+
+  app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "https://reddit-clone2-frontend.vercel.app");
+    res.header("Access-Control-Allow-Credentials", "true");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    next();
+  });
+
 app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());
