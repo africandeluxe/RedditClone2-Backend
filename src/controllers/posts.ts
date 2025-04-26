@@ -21,7 +21,7 @@ export const getPost = async (req: Request, res: Response): Promise<void> => {
       .populate("author", "username profilePicture")
       .populate({
         path: "comments",
-        populate: { path: "author", select: "username" }
+        populate: { path: "author", select: "username profilePicture" }
       });
       
     if (!post) {
