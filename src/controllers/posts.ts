@@ -6,7 +6,7 @@ import { AuthenticatedRequest } from "../middleware/auth";
 export const getPosts = async (req: Request, res: Response): Promise<void> => {
   try {
     const posts = await Post.find()
-      .populate("author", "username profilePictue")
+      .populate("author", "username profilePicture")
       .sort({ createdAt: -1 });
     res.json(posts);
   } catch (error) {
@@ -18,7 +18,7 @@ export const getPosts = async (req: Request, res: Response): Promise<void> => {
 export const getPost = async (req: Request, res: Response): Promise<void> => {
   try {
     const post = await Post.findById(req.params.id)
-      .populate("author", "username profilePictute")
+      .populate("author", "username profilePicture")
       .populate({
         path: "comments",
         populate: { path: "author", select: "username" }
