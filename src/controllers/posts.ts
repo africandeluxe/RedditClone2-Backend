@@ -138,14 +138,12 @@ export const votePost = async (req: AuthenticatedRequest, res: Response): Promis
       post.votes += 1;
       post.voters.push(userIdObj);
     } else if (vote === -1) {
-      if (!alreadyVoted) {
-        res.status(400).json({ message: "Not voted yet" });
-        return;
+      if (alreadyVoted) {
+        post.votes -= 1;
+        post.voters = post.voters.filter(voter => !voter.equals(userIdObj));
+      } else {
+        post.votes -= 1;
       }
-      post.votes -= 1;
-      post.voters = post.voters.filter(voter => 
-        !voter.equals(userIdObj)
-      );
     } else {
       res.status(400).json({ message: "Invalid vote" });
       return;
