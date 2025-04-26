@@ -6,7 +6,7 @@ import { AuthenticatedRequest } from "../middleware/auth";
 export const getPosts = async (req: Request, res: Response): Promise<void> => {
   try {
     const posts = await Post.find()
-      .populate("author", "username")
+      .populate("author", "username profilePictue")
       .sort({ createdAt: -1 });
     res.json(posts);
   } catch (error) {
@@ -18,7 +18,7 @@ export const getPosts = async (req: Request, res: Response): Promise<void> => {
 export const getPost = async (req: Request, res: Response): Promise<void> => {
   try {
     const post = await Post.findById(req.params.id)
-      .populate("author", "username")
+      .populate("author", "username profilePictute")
       .populate({
         path: "comments",
         populate: { path: "author", select: "username" }
@@ -171,7 +171,7 @@ export const getMyPosts = async (req: AuthenticatedRequest, res: Response): Prom
     }
 
     const posts = await Post.find({ author: userId })
-      .populate("author", "username")
+      .populate("author", "username profilePicture")
       .sort({ createdAt: -1 });
 
     console.log(`Found ${posts.length} post(s) for user ${userId}`);
