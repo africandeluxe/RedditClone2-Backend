@@ -124,8 +124,9 @@ export const voteComment = async (req: AuthenticatedRequest, res: Response): Pro
     }
 
     await comment.save();
-    await comment.populate('author', 'username profilePicture');
-    res.json(comment);
+    const updatedComment = await Comment.findById(comment._id)
+      .populate('author', 'username profilePicture');
+    res.json(updatedComment);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
