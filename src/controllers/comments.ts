@@ -101,7 +101,6 @@ export const voteComment = async (req: AuthenticatedRequest, res: Response): Pro
     }
 
     const comment = await Comment.findById(id);
-
     if (!comment) {
       res.status(404).json({ message: "Comment not found" });
       return;
@@ -112,11 +111,7 @@ export const voteComment = async (req: AuthenticatedRequest, res: Response): Pro
 
     if (hasVoted) {
       comment.voters = comment.voters.filter(voter => !voter.equals(userIdObj));
-      if (vote === 1) {
-        comment.votes -= 1;
-      } else if (vote === -1) {
-        comment.votes += 1;
-      }
+      comment.votes -= 1; 
     }
 
     if (vote === 1) {
@@ -131,10 +126,14 @@ export const voteComment = async (req: AuthenticatedRequest, res: Response): Pro
     }
 
     await comment.save();
-    const updatedComment = await Comment.findById(id)
-      .populate('author', 'username profilePicture');
+    const post = await Post.findById(comment.post)
+      .populate('author', 'username profilePicture')
+      .populate({
+        path: 'comments',
+        populate: { path: 'author', select: 'username profilePicture' }
+      });
 
-    res.json(updatedComment);
+    res.json(post);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
