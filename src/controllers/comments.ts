@@ -101,22 +101,23 @@ export const voteComment = async (req: AuthenticatedRequest, res: Response): Pro
     }
 
     const userIdObj = new mongoose.Types.ObjectId(userId);
-    const alreadyVoted = comment.voters.some(voter => voter.equals(userIdObj));
+    const hasVoted = comment.voters.some(voter => voter.equals(userIdObj));
+
+    if (hasVoted) {
+      comment.voters = comment.voters.filter(voter => !voter.equals(userIdObj));
+      if (vote === 1) {
+        comment.votes -= 1;
+      } else if (vote === -1) {
+        comment.votes += 1;
+      }
+    }
 
     if (vote === 1) {
-      if (alreadyVoted) {
-        res.status(400).json({ message: "Already voted" });
-        return;
-      }
       comment.votes += 1;
       comment.voters.push(userIdObj);
     } else if (vote === -1) {
-      if (!alreadyVoted) {
-        res.status(400).json({ message: "Not voted yet" });
-        return;
-      }
       comment.votes -= 1;
-      comment.voters = comment.voters.filter(voter => !voter.equals(userIdObj));
+      comment.voters.push(userIdObj);
     } else {
       res.status(400).json({ message: "Invalid vote" });
       return;
