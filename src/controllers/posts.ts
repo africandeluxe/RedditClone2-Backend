@@ -128,6 +128,8 @@ export const votePost = async (req: AuthenticatedRequest, res: Response): Promis
     post.votes += vote;
 
     await post.save();
+    await post.populate('author', 'username profilePicture');
+
     res.json(post);
   } catch (error) {
     console.error(error);
