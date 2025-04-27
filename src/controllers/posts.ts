@@ -131,20 +131,27 @@ export const votePost = async (req: AuthenticatedRequest, res: Response): Promis
 
     if (hasVoted) {
       post.voters = post.voters.filter(voter => !voter.equals(userIdObj));
-    }
       if (vote === 1) {
-        post.votes += 1;
-        post.voters.push(userIdObj);
-      } else if (vote === -1) {
         post.votes -= 1;
-        post.voters.push(userIdObj);
+      } else if (vote === -1) {
+        post.votes += 1;
+      }
+    }
+
+    if (vote === 1) {
+      post.votes += 1;
+      post.voters.push(userIdObj);
+    } else if (vote === -1) {
+      post.votes -= 1;
+      post.voters.push(userIdObj);
     } else {
       res.status(400).json({ message: "Invalid vote" });
       return;
     }
-    
+
     await post.save();
     res.json(post);
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
