@@ -91,8 +91,8 @@ export const deleteComment = async (req: AuthenticatedRequest, res: Response): P
 
 export const voteComment = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    const { vote } = req.body;
     const { id } = req.params;
+    const { vote } = req.body;
     const userId = req.user?._id;
 
     if (!userId) {
@@ -106,34 +106,13 @@ export const voteComment = async (req: AuthenticatedRequest, res: Response): Pro
       return;
     }
 
-    const userIdObj = new mongoose.Types.ObjectId(userId);
-    const hasVoted = comment.voters.some(voter => voter.equals(userIdObj));
-
-    if (hasVoted) {
-      comment.voters = comment.voters.filter(voter => !voter.equals(userIdObj));
-      comment.votes -= 1; 
-    }
-
-    if (vote === 1) {
-      comment.votes += 1;
-      comment.voters.push(userIdObj);
-    } else if (vote === -1) {
-      comment.votes -= 1;
-      comment.voters.push(userIdObj);
-    } else {
-      res.status(400).json({ message: "Invalid vote" });
-      return;
-    }
-
+    comment.votes += vote;
     await comment.save();
-    const post = await Post.findById(comment.post)
-      .populate('author', 'username profilePicture')
-      .populate({
-        path: 'comments',
-        populate: { path: 'author', select: 'username profilePicture' }
-      });
 
-    res.json(post);
+    const updatedComment = await Comment.findById(id)
+      .populate('author', 'username profilePicture');
+
+    res.json(updatedComment);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
