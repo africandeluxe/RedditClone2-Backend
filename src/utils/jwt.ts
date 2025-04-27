@@ -22,3 +22,8 @@ export const generateToken = (user: IUser): string => {
 export const verifyToken = (token: string): JwtPayload => {
   return jwt.verify(token, JWT_SECRET) as JwtPayload;
 };
+
+export const generateRefreshToken = (user: IUser): string => {
+  const payload: JwtPayload = { id: user._id.toString() };
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+};
