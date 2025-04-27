@@ -119,18 +119,22 @@ export const votePost = async (req: AuthenticatedRequest, res: Response): Promis
     }
 
     const post = await Post.findById(id);
-
     if (!post) {
       res.status(404).json({ message: "Post not found" });
       return;
     }
 
     post.votes += vote;
-
     await post.save();
-    await post.populate('author', 'username profilePicture');
 
-    res.json(post);
+    const updatedPost = await Post.findById(id)
+      .populate('author', 'username profilePicture')
+      .populate({
+        path: 'comments',
+        populate: { path: 'author', select: 'username profilePicture' }
+      });
+
+    res.json(updatedPost);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
