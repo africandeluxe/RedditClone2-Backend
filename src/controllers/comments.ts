@@ -124,6 +124,7 @@ export const voteComment = async (req: AuthenticatedRequest, res: Response): Pro
     }
 
     await comment.save();
+    await comment.populate('author', 'username profilePicture');
     res.json(comment);
   } catch (error) {
     console.error(error);
