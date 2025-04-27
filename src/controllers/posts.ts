@@ -109,42 +109,23 @@ export const deletePost = async (req: AuthenticatedRequest, res: Response): Prom
 
 export const votePost = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    const userId = req.user?._id;
-    const postId = req.params.id;
+    const { id } = req.params;
     const { vote } = req.body;
+    const userId = req.user?._id;
 
     if (!userId) {
       res.status(401).json({ message: "Not authorized" });
       return;
     }
 
-    if (![1, -1].includes(vote)) {
-      res.status(400).json({ message: "Invalid vote value" });
-      return;
-    }
+    const post = await Post.findById(id);
 
-    const post = await Post.findById(postId);
     if (!post) {
       res.status(404).json({ message: "Post not found" });
       return;
     }
 
-    const userIdObj = new mongoose.Types.ObjectId(userId);
-    const existingVote = post.voters.find(v => v.user.equals(userIdObj));
-
-    if (existingVote) {
-      if (existingVote.vote === vote) {
-        post.voters = post.voters.filter(v => !v.user.equals(userIdObj));
-        post.votes -= vote;
-      } else {
-        post.votes -= existingVote.vote;
-        existingVote.vote = vote;
-        post.votes += vote;
-      }
-    } else {
-      post.voters.push({ user: userIdObj, vote });
-      post.votes += vote;
-    }
+    post.votes += vote;
 
     await post.save();
     res.json(post);
