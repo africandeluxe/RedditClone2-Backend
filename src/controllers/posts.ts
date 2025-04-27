@@ -112,9 +112,14 @@ export const votePost = async (req: AuthenticatedRequest, res: Response): Promis
     const userId = req.user?._id;
     const postId = req.params.id;
     const { vote } = req.body;
-    
+
     if (!userId) {
       res.status(401).json({ message: "Not authorized" });
+      return;
+    }
+
+    if (![1, -1].includes(vote)) {
+      res.status(400).json({ message: "Invalid vote value" });
       return;
     }
 
@@ -123,9 +128,10 @@ export const votePost = async (req: AuthenticatedRequest, res: Response): Promis
       res.status(404).json({ message: "Post not found" });
       return;
     }
-    
+
     const userIdObj = new mongoose.Types.ObjectId(userId);
     const existingVote = post.voters.find(v => v.user.equals(userIdObj));
+
     if (existingVote) {
       if (existingVote.vote === vote) {
         post.voters = post.voters.filter(v => !v.user.equals(userIdObj));
@@ -142,7 +148,6 @@ export const votePost = async (req: AuthenticatedRequest, res: Response): Promis
 
     await post.save();
     res.json(post);
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
