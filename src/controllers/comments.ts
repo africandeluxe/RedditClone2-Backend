@@ -92,10 +92,17 @@ export const deleteComment = async (req: AuthenticatedRequest, res: Response): P
 export const voteComment = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { vote } = req.body;
-    const comment = await Comment.findById(req.params.id);
+    const { id } = req.params;
     const userId = req.user?._id;
 
-    if (!comment || !userId) {
+    if (!userId) {
+      res.status(401).json({ message: "Not authorized" });
+      return;
+    }
+
+    const comment = await Comment.findById(id);
+
+    if (!comment) {
       res.status(404).json({ message: "Comment not found" });
       return;
     }
@@ -124,8 +131,9 @@ export const voteComment = async (req: AuthenticatedRequest, res: Response): Pro
     }
 
     await comment.save();
-    const updatedComment = await Comment.findById(comment._id)
+    const updatedComment = await Comment.findById(id)
       .populate('author', 'username profilePicture');
+
     res.json(updatedComment);
   } catch (error) {
     console.error(error);
