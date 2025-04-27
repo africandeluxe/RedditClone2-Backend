@@ -119,34 +119,25 @@ export const votePost = async (req: AuthenticatedRequest, res: Response): Promis
     }
 
     const post = await Post.findById(postId);
-    
     if (!post) {
       res.status(404).json({ message: "Post not found" });
       return;
     }
     
     const userIdObj = new mongoose.Types.ObjectId(userId);
-
-    const hasVoted = post.voters.some(voter => voter.equals(userIdObj));
-
-    if (hasVoted) {
-      post.voters = post.voters.filter(voter => !voter.equals(userIdObj));
-      if (vote === 1) {
-        post.votes -= 1;
-      } else if (vote === -1) {
-        post.votes += 1;
+    const existingVote = post.voters.find(v => v.user.equals(userIdObj));
+    if (existingVote) {
+      if (existingVote.vote === vote) {
+        post.voters = post.voters.filter(v => !v.user.equals(userIdObj));
+        post.votes -= vote;
+      } else {
+        post.votes -= existingVote.vote;
+        existingVote.vote = vote;
+        post.votes += vote;
       }
-    }
-
-    if (vote === 1) {
-      post.votes += 1;
-      post.voters.push(userIdObj);
-    } else if (vote === -1) {
-      post.votes -= 1;
-      post.voters.push(userIdObj);
     } else {
-      res.status(400).json({ message: "Invalid vote" });
-      return;
+      post.voters.push({ user: userIdObj, vote });
+      post.votes += vote;
     }
 
     await post.save();
